@@ -1,0 +1,10 @@
+    PID TTY          TIME CMD
+3109682 pts/1    00:00:00 zsh
+3115376 pts/1    00:00:00 a.out
+3115377 pts/1    00:00:00 a.out
+3115378 pts/1    00:00:00 cat
+3115379 pts/1    00:00:00 cat
+3115380 pts/1    00:00:00 ls <defunct>
+3115381 pts/1    00:00:00 cat <defunct>
+3115382 pts/1    00:00:00 ps
+3115383 pts/1    00:00:00 cat
