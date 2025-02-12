@@ -1,10 +1,11 @@
 CC = cc
-CFLAGS = -Wall -Wextra -Werror
+#CFLAGS = -Wall -Wextra -Werror
 
 NAME = libft.a
 
 SRCS =  ft_split.c  ft_strncmp.c ft_strnstr.c  \
-	get_next_line/get_next_line.c get_next_line/get_next_line_utils.c
+	get_next_line/get_next_line.c get_next_line/get_next_line_utils.c \
+	utils.c execute_cmd.c
 
 OBJS = $(SRCS:.c=.o)
 #BONUS = ft_lstadd_back_bonus.c ft_lstadd_front_bonus.c ft_lstclear_bonus.c \

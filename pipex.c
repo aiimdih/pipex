@@ -18,78 +18,6 @@
 #include "libft.h"
 #include "get_next_line/get_next_line.h"
 
-typedef struct d_cmd
-{
-	int 	input ;
-	int		out ;
-	char	**envp;
-	char	*limiter;
-	int		here_doc ;
-	int     prev_in;
-} t_cmd;
-
-void dup_and_close(int fd, int fd_target)
-{
-	dup2(fd, fd_target);
-	close(fd);
-}
-
-void handle_erros(char *Error_msg)
-{
-	perror(Error_msg);
-	exit(1);
-}
-
-char *execute_command(char *cmds, char *path, char **env)
-{
-        char **cmd;
-        cmd = ft_split(cmds, ' ');
-        if (execve(path, cmd, env) == -1)
-                printf("error");
-		while(*cmd)
-			free(*cmd++);
-        return (NULL);
-}
-
-char *get_env(char **env, char *cmd)
-{
-        int i;
-        char **all_paths;
-        char *find_right_path;
-        char *full_path;
-        char **cmds;
-
-        i = 0;
-        while (ft_strnstr(env[i], "PATH=", 5) == 0)
-                i++;
-        all_paths = ft_split(env[i] + 5, ':');
-        i = 0;
-        while (all_paths[i++])
-        {
-                find_right_path = ft_strjoin(all_paths[i], "/");
-                cmds = ft_split(cmd, ' ');
-                full_path = ft_strjoin(find_right_path, cmds[0]);
-				while (*cmds)
-					free(*cmds++);
-                if (access(full_path, F_OK) == 0)
-                {
-                        while (*all_paths)
-                                free(*all_paths++);
-                        free(find_right_path);
-                        return (full_path);
-                }
-        }
-        return 0;
-}
-
-void pre_excute_cmd(char *cmd, char **env)
-{
-	char *path;
-	path = get_env(env, cmd);
-    execute_command(cmd, path, env);
-	free(path);
-}
-
 void handle_here_doc(t_cmd *file)
 {
 	int temp_fd;
@@ -97,7 +25,7 @@ void handle_here_doc(t_cmd *file)
  	char *line;
 
 	if ((temp_fd = open(tmp, O_CREAT | O_RDWR | O_TRUNC, 0644)) == -1)
-		handle_erros("Error opening file1");
+		handle_errors(tmp);
 	write (1,">", 1);
 	line = get_next_line(STDIN_FILENO);
 	while (line != NULL)
@@ -113,7 +41,7 @@ void handle_here_doc(t_cmd *file)
 	}
 	close(temp_fd);
 	if ((temp_fd = open(tmp, O_RDONLY)) == -1 )
-		handle_erros("Error opening file1");
+		handle_errors(tmp);
 	dup_and_close(temp_fd , STDIN_FILENO);
 }
 
@@ -166,6 +94,8 @@ void handle_fork(int command_size, char ** commands,  t_cmd *file)
 			pre_excute_cmd(commands[children_sz],file->envp);
 		}
 		close(pipes[1]);
+		if (children_sz > 0)
+			close(file->prev_in);
 		file->prev_in = pipes[0];
 		children_sz++;
 	}
@@ -181,7 +111,7 @@ int main(int ac, char **av, char **env)
 	int command_number;
 
 	if (ac < 3)
-		handle_erros("cmd under 3");
+		handle_errors("cmd under 3");
 	commands = &av[2];
 	command_number = ac - 3;
 	file = malloc(sizeof(t_cmd));
@@ -194,9 +124,9 @@ int main(int ac, char **av, char **env)
 		file->here_doc = TRUE;
 	}
 	else if ((file->input = open(av[1], O_RDONLY)) == -1)
-			handle_erros("Error opening file1");
+			handle_errors(av[1]);
 	if ((file->out = open(av[ac - 1], O_CREAT | O_WRONLY | O_TRUNC, 0644)) == -1)
-		handle_erros("Error opening file1");
+		handle_errors(av[ac - 1]);
 	handle_fork(command_number, commands, file);
 	free(file);
 }
