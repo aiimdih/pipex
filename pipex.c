@@ -99,6 +99,9 @@ void handle_fork(int command_size, char ** commands,  t_cmd *file)
 		file->prev_in = pipes[0];
 		children_sz++;
 	}
+	close(pipes[0]);
+	close(file->input);
+	close(file->out);
 	wait_childrens(pid, children_sz);
 	free(pid);
 }
