@@ -27,8 +27,8 @@ typedef struct d_cmd
 	int     prev_in;
 } t_cmd;
 char				**ft_split(const char *s, char c);
-char *search_path(char *cmd, char **all_paths, int i);
-void free_split_array(char **array) ;
+char *search_path(char *cmd, char **all_paths);
+void free_split(char **ptr);
 char				*ft_itoa(int n);
 char				*ft_strchr(const char *str,size_t *new_pos, int search_str);
 char				*ft_strdup(const char *s);
@@ -67,5 +67,5 @@ void dup_and_close(int fd, int fd_target);
 void handle_errors(char *Error_msg);
 char *execute_command(char *cmds, char *path, char **env);
 char *get_env(char **env, char *cmd);
-void pre_excute_cmd(char *cmd, char **env);
+void pre_excute_cmd(char *cmd, t_cmd *file);
 #endif

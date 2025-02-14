@@ -11,29 +11,31 @@ char *execute_command(char *cmds, char *path, char **env)
         return (NULL);
 }
 
-char *search_path(char *cmd, char **all_paths, int i)
-{
-	char *full_path;
-	char *find_right_path;
-	char **cmds;
 
-	while (all_paths[i++])
-	{
-			find_right_path = ft_strjoin(all_paths[i], "/");
-			cmds = ft_split(cmd, ' ');
-			full_path = ft_strjoin(find_right_path, cmds[0]);
-			while (*cmds)
-				free(*cmds++);
-			if (access(full_path, F_OK) == 0)
-			{
-					while (*all_paths)
-							free(*all_paths++);
-					free(find_right_path);
-					return (full_path);
-			}
-	}
-	handle_errors(cmd);
-	return 0;
+char *search_path(char *cmd, char **all_paths)
+{
+    char *full_path;
+    char *find_right_path;
+    char **cmds;
+    int i = 0;
+
+    cmds = ft_split(cmd, ' ');
+    if (!cmds || !cmds[0])
+    {
+        handle_errors(cmd);
+        return NULL;
+    }
+    while (all_paths[i])
+    {
+        find_right_path = ft_strjoin(all_paths[i], "/");
+        full_path = ft_strjoin(find_right_path, cmds[0]);
+        free(find_right_path);
+        if (access(full_path, F_OK) == 0)
+            return (free_split(cmds), full_path);
+        free(full_path);
+        i++;
+    }
+    return (free_split(cmds),free_split(all_paths), NULL);
 }
 char *get_env(char **env, char *cmd)
 {
@@ -42,33 +44,32 @@ char *get_env(char **env, char *cmd)
         char **cmds;
 
         i = 0;
-        while (ft_strnstr(env[i], "PATH=", 5) == 0)
-                i++;
-        all_paths = ft_split(env[i] + 5, ':');
-        i = 0;
-		if (ft_strnstr(cmd, "/", ft_strlen(cmd)) == 0)
-		{
-			return(search_path(cmd, all_paths, i));
-		}
-		else
+		if (ft_strnstr(cmd, "/", ft_strlen(cmd)) != 0)
 		{
 			if (access(cmd, F_OK) == 0)
 				if (access(cmd, X_OK) == 0)
 					return (cmd);
-				else
-					handle_errors(cmd);
-			else 
-				handle_errors(cmd);
-			return 0;
 		}
-		return 0;
+		else
+		{
+			while (ft_strnstr(env[i], "PATH=", 5) == 0)
+					i++;
+			all_paths = ft_split(env[i] + 5, ':');
+			return(search_path(cmd, all_paths));
+		}
+		return NULL;
 }
 
-void pre_excute_cmd(char *cmd, char **env)
+void pre_excute_cmd(char *cmd, t_cmd *file)
 {
 	char *path;
-	path = get_env(env, cmd);
-    execute_command(cmd, path, env);
+	path = get_env(file->envp, cmd);
+	if (path == NULL)
+	{
+		free(file);
+		handle_errors(cmd);
+	}
+    execute_command(cmd, path, file->envp);
 	free(path);
 }
 

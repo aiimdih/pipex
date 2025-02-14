@@ -1,6 +1,17 @@
 #include "libft.h"
-//
 
+void free_split(char **ptr)
+{
+	int i;
+	
+	i = 0;
+	while (ptr[i])
+	{
+		free(ptr[i]);
+		i++;
+	}
+	free(ptr);
+}
 void dup_and_close(int fd, int fd_target)
 {
 	dup2(fd, fd_target);
@@ -24,13 +35,3 @@ void handle_errors(char *cmd)
 	perror("");
 	exit(1);
 }
-void free_split_array(char **array) {
-    if (!array) return; // Check if the array is NULL
-
-    for (int i = 0; array[i]; i++) {
-        free(array[i]); // Free the individual string
-    }
-
-    free(array);
-}
-
