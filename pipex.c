@@ -29,7 +29,8 @@ void	handle_here_doc(t_cmd *file)
 		tmp[1] += 1;
 	temp_fd = open(tmp, O_CREAT | O_RDWR | O_TRUNC, 0644);
 	fail_check(temp_fd, tmp, file);
-	while (write(1, ">", 1), line != NULL)
+	line = "";
+	while (write(1, "> ", 2), line != NULL)
 	{
 		line = get_next_line(STDIN_FILENO);
 		if (ft_strncmp(line, file->limiter, ft_strlen(file->limiter)) == 0)
@@ -51,14 +52,21 @@ void	handle_child(int children_sz, t_cmd *file, int *pipes, int command_size)
 	if (children_sz == 0)
 	{
 		if (!file->here_doc)
+		{
+			dup_and_close(pipes[1], STDOUT_FILENO);
+			file->fd_in = open(file->input, O_RDONLY);
 			dup_and_close(file->fd_in, STDIN_FILENO);
+		}
 		else
 			handle_here_doc(file);
 	}
 	else
 		dup_and_close(file->prev_in, STDIN_FILENO);
 	if (children_sz == (command_size - 1))
+	{
+		file->fd_out = open(file->out, O_CREAT | O_WRONLY | O_TRUNC, 0644);
 		dup_and_close(file->fd_out, STDOUT_FILENO);
+	}
 	else
 		dup2(pipes[1], STDOUT_FILENO);
 	close(pipes[1]);
@@ -100,8 +108,6 @@ void	handle_fork(int command_size, char **commands, t_cmd *file)
 		children_sz++;
 	}
 	close(pipes[0]);
-	close(file->fd_in);
-	close(file->fd_out);
 	wait_childrens(file->pid, children_sz);
 	free(file->pid);
 }
@@ -131,6 +137,6 @@ int	main(int ac, char **av, char **env)
 	else 
 		file->input = av[1];
 	file->out = av[ac - 1];
-	open_files(file);
 	handle_fork(command_number, commands, file);
+	free(file);
 }
