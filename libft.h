@@ -15,20 +15,28 @@
 # include <stdlib.h>
 # include <unistd.h>
 # include <stdio.h>
+#include <fcntl.h>      // For open() and O_* flags
+#include <sys/stat.h>   // For mode constants (0644)
 #define TRUE 1 
 #define FALSE 0
 typedef struct d_cmd
 {
-	int 	input ;
-	int		out ;
 	char	**envp;
 	char	*limiter;
+	char	*input;
+	char	*out;
+	int 	fd_in ;
+	int		fd_out ;
 	int		here_doc ;
 	int     prev_in;
+	pid_t	*pid;
 } t_cmd;
+int					check_here_doc(char *file_name);
+void	fail_check(int fd, char *str, t_cmd *file);
 char				**ft_split(const char *s, char c);
-char *search_path(char *cmd, char **all_paths);
-void free_split(char **ptr);
+void				open_files(t_cmd *file);
+char				*search_path(char *cmd, char **all_paths);
+void				free_split(char **ptr);
 char				*ft_itoa(int n);
 char				*ft_strchr(const char *str,size_t *new_pos, int search_str);
 char				*ft_strdup(const char *s);
@@ -63,7 +71,7 @@ void				ft_putendl_fd(char *s, int fd);
 void				ft_putnbr_fd(int n, int fd);
 void				ft_putstr_fd(char *s, int fd);
 void				ft_striteri(char *s, void (*f)(unsigned int, char *));
-void dup_and_close(int fd, int fd_target);
+void				dup_and_close(int fd, int fd_target);
 void handle_errors(char *Error_msg);
 char *execute_command(char *cmds, char *path, char **env);
 char *get_env(char **env, char *cmd);
