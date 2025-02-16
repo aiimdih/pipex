@@ -23,31 +23,13 @@ void	fail_check(int fd, char *str, t_cmd *file)
 	}
 }
 
-int check_here_doc(char *file_name)
+int	check_here_doc(char *file_name)
 {
 	if (ft_strncmp(file_name, "here_doc", 8) == 0)
-		return TRUE;
-	return FALSE;
+		return (TRUE);
+	return (FALSE);
 }
 
-void open_files(t_cmd *file)
-{
-	file->fd_out = open(file->out, O_CREAT | O_WRONLY | O_TRUNC, 0644);
-	if (file->fd_out == -1)
-	{
-		free(file);
-		handle_errors(file->out);
-	}
-	if (!file->here_doc)
-	{
-		file->fd_in = open(file->input, O_RDONLY);
-		if (file->fd_in == -1)
-		{
-			free(file);
-			handle_errors(file->input);
-		}
-	}
-}
 void	free_split(char **ptr)
 {
 	int	i;
@@ -67,20 +49,11 @@ void	dup_and_close(int fd, int fd_target)
 	close(fd);
 }
 
-void	put_errors(char *cmd)
-{
-	while (*cmd)
-	{
-		write(2, cmd, 1);
-		cmd++;
-	}
-}
-
 void	handle_errors(char *cmd)
 {
-	put_errors("pipex :  ");
-	put_errors(cmd);
-	put_errors(" ");
+	write(2, "pipex :  ", 9);
+	write(2, cmd, ft_strlen(cmd));
+	write(2, " ", 1);
 	perror("");
 	exit(1);
 }

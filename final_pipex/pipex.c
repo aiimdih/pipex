@@ -6,29 +6,24 @@
 /*   By: aiimdih <aiimdih@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/25 18:56:05 by aiimdih           #+#    #+#             */
-/*   Updated: 2025/02/14 20:22:33 by aiimdih          ###   ########.fr       */
+/*   Updated: 2025/02/16 18:01:04 by aiimdih          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line/get_next_line.h"
 #include "libft.h"
-#include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/wait.h>
-#include <unistd.h>
 
-void	handle_here_doc(t_cmd *file)
+void	handle_here_doc(t_cmd *file, char **av)
 {
 	int		temp_fd;
-	char	tmp[8];
 	char	*line;
 
-	ft_strlcpy(tmp, "tmp.txt", 8);
-	while (access(tmp, F_OK) == 0)
-		tmp[1] += 1;
-	temp_fd = open(tmp, O_CREAT | O_RDWR | O_TRUNC, 0644);
-	fail_check(temp_fd, tmp, file);
+	file->limiter = av[2];
+	file->here_doc = TRUE;
+	ft_strlcpy(file->tmp, "tmp.txt", 8);
+	while (access(file->tmp, F_OK) == 0)
+		file->tmp[1] += 1;
+	temp_fd = open(file->tmp, O_CREAT | O_RDWR | O_TRUNC, 0644);
+	fail_check(temp_fd, file->tmp, file);
 	line = "";
 	while (write(1, "> ", 2), line != NULL)
 	{
@@ -39,26 +34,21 @@ void	handle_here_doc(t_cmd *file)
 			break ;
 		}
 		write(temp_fd, line, ft_strlen(line));
+		free(line);
 	}
 	close(temp_fd);
-	temp_fd = open(tmp, O_RDONLY);
-	fail_check(temp_fd, tmp, file);
-	dup_and_close(temp_fd, STDIN_FILENO);
-	unlink(tmp);
 }
 
 void	handle_child(int children_sz, t_cmd *file, int *pipes, int command_size)
 {
 	if (children_sz == 0)
 	{
+		dup_and_close(pipes[1], STDOUT_FILENO);
 		if (!file->here_doc)
-		{
-			dup_and_close(pipes[1], STDOUT_FILENO);
 			file->fd_in = open(file->input, O_RDONLY);
-			dup_and_close(file->fd_in, STDIN_FILENO);
-		}
 		else
-			handle_here_doc(file);
+			file->fd_in = open(file->tmp, O_RDONLY);
+		dup_and_close(file->fd_in, STDIN_FILENO);
 	}
 	else
 		dup_and_close(file->prev_in, STDIN_FILENO);
@@ -114,7 +104,6 @@ void	handle_fork(int command_size, char **commands, t_cmd *file)
 
 int	main(int ac, char **av, char **env)
 {
-	int		children_sz;
 	char	**commands;
 	t_cmd	*file;
 	int		command_number;
@@ -131,12 +120,13 @@ int	main(int ac, char **av, char **env)
 	{
 		command_number = ac - 4;
 		commands = &av[3];
-		file->limiter = av[2];
-		file->here_doc = TRUE;
+		handle_here_doc(file, av);
 	}
-	else 
+	else
 		file->input = av[1];
 	file->out = av[ac - 1];
 	handle_fork(command_number, commands, file);
+	if (file->here_doc)
+		unlink(file->tmp);
 	free(file);
 }

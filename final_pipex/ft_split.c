@@ -3,16 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   ft_split.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aiimdih <marvin@42.fr>                     +#+  +:+       +#+        */
+/*   By: aiimdih <aiimdih@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/03 17:56:34 by aiimdih           #+#    #+#             */
-/*   Updated: 2025/01/23 17:34:18 by aiimdih          ###   ########.fr       */
+/*   Updated: 2025/02/16 18:30:06 by aiimdih          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
-
-
 
 static int	count_words(char *str, char charset)
 {
